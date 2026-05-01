@@ -10,6 +10,7 @@ flags.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from inspect_ai.dataset import Sample
@@ -17,6 +18,13 @@ from inspect_ai.dataset import Sample
 from p3.personas import by_name, render
 from p3.personas.attributes import Persona
 from p3.schemas import Task, load_tasks
+
+# CONTRIBUTING.md tells task authors to put ``refusal_expected = X`` in
+# ``metadata.notes`` when they want the refusal scorer to use it. Parse
+# it out so the scorer can read a structured ``metadata.refusal_expected``.
+_REFUSAL_RE = re.compile(
+    r"refusal_expected\s*=\s*(refuse|answer|hedge)\b", re.IGNORECASE
+)
 
 
 def task_to_sample(task: Task, attach_persona: bool = True) -> Sample:
@@ -46,8 +54,14 @@ def task_to_sample(task: Task, attach_persona: bool = True) -> Sample:
     }
     if task.metadata.notes:
         metadata["notes"] = task.metadata.notes
+        m = _REFUSAL_RE.search(task.metadata.notes)
+        if m:
+            metadata["refusal_expected"] = m.group(1).lower()
     if task.metadata.extras:
         metadata["extras"] = task.metadata.extras
+        # extras can also carry a structured override; it wins over notes.
+        if "refusal_expected" in task.metadata.extras:
+            metadata["refusal_expected"] = task.metadata.extras["refusal_expected"]
 
     return Sample(
         id=task.id,
