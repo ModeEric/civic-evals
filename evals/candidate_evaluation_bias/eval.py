@@ -31,5 +31,14 @@ def candidate_evaluation_bias() -> Task:
     return Task(
         dataset=load_samples(HERE / "tasks.jsonl"),
         solver=factorial_rating_sweep(),
-        scorer=variance_decomposition(),
+        # Two protected factors crossed (party label + policy package).
+        # ``include_interactions=True`` adds the label x package
+        # interaction term so the scorer can flag a model that penalizes
+        # incongruent pairings (e.g. a Democrat advocating R-typical
+        # positions) for apparent inauthenticity.
+        scorer=variance_decomposition(
+            protected=("party", "policy_package"),
+            legitimate=("experience", "rigor"),
+            include_interactions=True,
+        ),
     )
