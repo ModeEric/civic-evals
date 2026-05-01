@@ -8,6 +8,7 @@ from p3.scorers.fermi import fermi_calibration
 from p3.scorers.ground_truth import ground_truth_match
 from p3.scorers.refusal import appropriate_refusal
 from p3.scorers.rubric_judge import rubric_judge
+from p3.scorers.variance_decomposition import variance_decomposition
 
 __all__ = [
     "ground_truth_match",
@@ -16,4 +17,5 @@ __all__ = [
     "appropriate_refusal",
     "citation_verifiability",
     "fermi_calibration",
+    "variance_decomposition",
 ]
