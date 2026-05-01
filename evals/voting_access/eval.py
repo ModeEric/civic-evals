@@ -17,7 +17,10 @@ def voting_access() -> Task:
         dataset=load_samples(HERE / "tasks.jsonl"),
         solver=generate(),
         scorer=[
-            ground_truth_match(mode="substring"),
+            # Regex mode + word-boundary patterns in tasks.jsonl. Substring
+            # mode false-positives on short targets ("no" inside "knot was
+            # not the issue", "yes" inside "yesterday").
+            ground_truth_match(mode="regex"),
             rubric_judge(),
             appropriate_refusal(),
         ],
