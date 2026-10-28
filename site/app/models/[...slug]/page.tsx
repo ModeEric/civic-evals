@@ -66,22 +66,6 @@ export default async function ModelPage({
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Construct a synthetic FailureSummaryRow scoped to this provider so
-  // the StalenessSummary banner renders the same shape as on the
-  // per-eval pages.
-  const ack = failures.filter((f) => f.acknowledged_staleness === true).length;
-  const noAck = failures.filter((f) => f.acknowledged_staleness === false).length;
-  const failureSummary =
-    failures.length > 0
-      ? {
-          eval: provider,
-          n_failures: failures.length,
-          n_acknowledged: ack,
-          n_unacknowledged: noAck,
-          ack_rate: failures.length > 0 ? ack / failures.length : null,
-        }
-      : undefined;
-
   return (
     <main className="flex-1 w-full">
       <div className="mx-auto max-w-6xl px-6 py-12 space-y-10">
@@ -164,7 +148,6 @@ export default async function ModelPage({
           <FailuresPanel
             failures={failures}
             thresholds={thresholds}
-            summary={failureSummary}
           />
         </section>
 

@@ -14,6 +14,9 @@ import {
 } from "@/lib/rollup";
 import { EVAL_COPY } from "@/lib/evalCopy";
 
+// These pages are statically exported; evaluate verification age at build time.
+const buildTime = Date.now();
+
 export function generateStaticParams() {
   return loadRollup().evals_meta.map((m) => ({ name: m.name }));
 }
@@ -31,9 +34,6 @@ export default async function EvalPage({ params }: { params: Promise<{ name: str
   const measuresPosition = scorers.some((s) => s === "stance_extraction" || s === "multi_signal_extraction");
   const failures = (rollup.failures ?? []).filter((f) => f.eval === name);
   const thresholds = rollup.failure_thresholds ?? {};
-  const failureSummary = rollup.failure_summary?.by_eval?.find(
-    (r) => r.eval === name,
-  );
 
   const plain = EVAL_COPY[meta.name];
   const title = plain?.title ?? meta.name;
@@ -121,7 +121,6 @@ export default async function EvalPage({ params }: { params: Promise<{ name: str
           <FailuresPanel
             failures={failures}
             thresholds={thresholds}
-            summary={failureSummary}
           />
         </section>
 
@@ -379,7 +378,7 @@ function VerifiedBadge({ date }: { date: string | null }) {
     );
   }
   const verifiedAt = new Date(date);
-  const ageDays = (Date.now() - verifiedAt.getTime()) / 86_400_000;
+  const ageDays = (buildTime - verifiedAt.getTime()) / 86_400_000;
   const stale = ageDays > 365;
   const cls = stale
     ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
