@@ -1,9 +1,8 @@
 name: deploy-pages
 
 # Builds the Next.js dashboard as a static export and publishes it to
-# GitHub Pages. Runs on pushes to main that touch the site (including the
-# weekly rollup.json refresh committed by refresh-results.yml) and on
-# manual dispatch. Requires repo Settings → Pages → Source = "GitHub Actions".
+# GitHub Pages. Runs on pushes to main that touch the site and on manual
+# dispatch. Requires repo Settings → Pages → Source = "GitHub Actions".
 
 on:
   push:

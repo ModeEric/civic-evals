@@ -74,15 +74,17 @@ pnpm install
 pnpm dev
 ```
 
-The `refresh-results` GitHub Action runs the eval suite on a weekly schedule (and on `workflow_dispatch`), regenerates `rollup.json`, and commits the update. The `deploy-pages` workflow then rebuilds the static export and republishes it to GitHub Pages automatically.
+The dashboard displays saved results; deploying it does not require new model calls. The `refresh-results` GitHub Action is **manual-only** (`workflow_dispatch`). Scheduled reruns are disabled to preserve the reviewed results and avoid recurring API spend.
 
-Repo secrets (set under `Settings → Secrets and variables → Actions`):
+A manual refresh runs the eval suite, replaces `rollup.json`, and commits the update automatically. Approve the models, run size, and estimated cost before starting it. This workflow can still publish partial results after individual eval failures, and its cost check runs after the API calls. For paper and grant snapshots, publish a validated rollup through a reviewed PR.
+
+Repo secrets for evaluation runs (set under `Settings → Secrets and variables → Actions`; building the saved-results dashboard needs no model API keys):
 
 - `ANTHROPIC_API_KEY` — required.
 - `OPENAI_API_KEY` — optional. When present, every eval also runs against `openai/gpt-4o-2024-08-06`, populating the cross-provider columns on the site. The current workflow uses direct provider keys; local OpenRouter routing does not configure repository secrets.
 - `SLACK_WEBHOOK_URL` — optional. When present, the workflow posts a summary to the configured Slack channel after each successful run (per-eval × provider mean table, calibration AUROC, baseline scores, Δ vs. the previous rollup) and a short failure notification when the run dies. No-op when unset, so unconfigured forks don't try to post anywhere.
 
-Deploying to GitHub Pages: the site is a fully static Next.js export, published by the [`deploy-pages`](.github/workflows/deploy-pages.yml) workflow. One-time setup: in **Settings → Pages**, set **Source** to **GitHub Actions**. The workflow runs on pushes to `main` that touch `site/**` (including the weekly `rollup.json` refresh) and on manual dispatch; the published URL is `https://<owner>.github.io/civic-evals/`.
+Deploying to GitHub Pages: the site is a fully static Next.js export, published by the [`deploy-pages`](.github/workflows/deploy-pages.yml) workflow. One-time setup: in **Settings → Pages**, set **Source** to **GitHub Actions**. The workflow runs on pushes to `main` that touch `site/**` and on manual dispatch; the published URL is `https://<owner>.github.io/civic-evals/`.
 
 It's served from the `/civic-evals` project subpath via `NEXT_PUBLIC_BASE_PATH` (set in the workflow). For a custom domain or a `<owner>.github.io` user repo, leave that variable unset so the site builds for the root path. Build locally with `pnpm build` (output in `site/out/`).
 
